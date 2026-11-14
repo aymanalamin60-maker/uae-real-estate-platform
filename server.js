@@ -26,6 +26,34 @@ const defaultProperties = [
 
 let properties = [...defaultProperties];
 
+const clients = [
+  { id: 1, name: 'Ahmed Al-Mansoori', type: 'Buyer', phone: '+971 50 123 4567', email: 'ahmed@example.com', status: 'Qualified', city: 'Dubai' },
+  { id: 2, name: 'Sarah Rahman', type: 'Tenant', phone: '+971 55 901 2233', email: 'sarah@example.com', status: 'Active', city: 'Abu Dhabi' },
+  { id: 3, name: 'Khalid Hassan', type: 'Investor', phone: '+971 56 561 1122', email: 'khalid@example.com', status: 'Hot Lead', city: 'Sharjah' },
+  { id: 4, name: 'Mina Haddad', type: 'Seller', phone: '+971 50 717 9988', email: 'mina@example.com', status: 'Negotiating', city: 'Dubai' },
+];
+
+const tenants = [
+  { id: 1, name: 'Sarah Rahman', unit: 'Marina Bay Residence', rent: 'AED 18,500', status: 'Current', dueDate: '2026-12-15' },
+  { id: 2, name: 'Yasmin Ali', unit: 'City Walk Studio', rent: 'AED 11,200', status: 'Pending', dueDate: '2027-01-05' },
+  { id: 3, name: 'Nabil Al-Sayed', unit: 'Palm Heights Villa', rent: 'AED 42,000', status: 'Current', dueDate: '2026-12-24' },
+  { id: 4, name: 'Rana Farouk', unit: 'Al Barsha Townhouse', rent: 'AED 27,000', status: 'Review', dueDate: '2026-12-20' },
+];
+
+const contracts = [
+  { id: 1, property: 'Marina Bay Residence', tenant: 'Sarah Rahman', rent: 'AED 18,500/mo', dueDate: '2026-12-15', status: 'Active' },
+  { id: 2, property: 'Palm Heights Villa', tenant: 'Nabil Al-Sayed', rent: 'AED 42,000/mo', dueDate: '2026-12-24', status: 'Renewal' },
+  { id: 3, property: 'Business Bay Office', tenant: 'Crest Advisory', rent: 'AED 31,000/mo', dueDate: '2026-12-30', status: 'Active' },
+  { id: 4, property: 'City Walk Studio', tenant: 'Yasmin Ali', rent: 'AED 11,200/mo', dueDate: '2027-01-05', status: 'Pending' },
+];
+
+const commissions = [
+  { id: 1, agent: 'Rami Malek', deal: 'Palm Heights Villa', amount: 'AED 350,000', status: 'Pending' },
+  { id: 2, agent: 'Noor Khan', deal: 'City Walk Studio', amount: 'AED 120,000', status: 'Approved' },
+  { id: 3, agent: 'Omar Salem', deal: 'Business Bay Office', amount: 'AED 260,000', status: 'In Review' },
+  { id: 4, agent: 'Sara Ibrahim', deal: 'Marina Bay Residence', amount: 'AED 90,000', status: 'Paid' },
+];
+
 const createDashboard = () => ({
   stats: [
     { key: 'listed', label: 'Properties Listed', value: `${properties.length}`, trend: '+12.4%' },
@@ -49,27 +77,6 @@ const createDashboard = () => ({
     occupancy: item.status === 'Rented' ? 'Occupied' : 'Ready to move',
   })),
 });
-
-const clients = [
-  { id: 1, name: 'Ahmed Al-Mansoori', type: 'Buyer', phone: '+971 50 123 4567', email: 'ahmed@example.com', status: 'Qualified', city: 'Dubai' },
-  { id: 2, name: 'Sarah Rahman', type: 'Tenant', phone: '+971 55 901 2233', email: 'sarah@example.com', status: 'Active', city: 'Abu Dhabi' },
-  { id: 3, name: 'Khalid Hassan', type: 'Investor', phone: '+971 56 561 1122', email: 'khalid@example.com', status: 'Hot Lead', city: 'Sharjah' },
-  { id: 4, name: 'Mina Haddad', type: 'Seller', phone: '+971 50 717 9988', email: 'mina@example.com', status: 'Negotiating', city: 'Dubai' },
-];
-
-const contracts = [
-  { id: 1, property: 'Marina Bay Residence', tenant: 'Sarah Rahman', rent: 'AED 18,500/mo', dueDate: '2026-12-15', status: 'Active' },
-  { id: 2, property: 'Palm Heights Villa', tenant: 'Nabil Al-Sayed', rent: 'AED 42,000/mo', dueDate: '2026-12-24', status: 'Renewal' },
-  { id: 3, property: 'Business Bay Office', tenant: 'Crest Advisory', rent: 'AED 31,000/mo', dueDate: '2026-12-30', status: 'Active' },
-  { id: 4, property: 'City Walk Studio', tenant: 'Yasmin Ali', rent: 'AED 11,200/mo', dueDate: '2027-01-05', status: 'Pending' },
-];
-
-const commissions = [
-  { id: 1, agent: 'Rami Malek', deal: 'Palm Heights Villa', amount: 'AED 350,000', status: 'Pending' },
-  { id: 2, agent: 'Noor Khan', deal: 'City Walk Studio', amount: 'AED 120,000', status: 'Approved' },
-  { id: 3, agent: 'Omar Salem', deal: 'Business Bay Office', amount: 'AED 260,000', status: 'In Review' },
-  { id: 4, agent: 'Sara Ibrahim', deal: 'Marina Bay Residence', amount: 'AED 90,000', status: 'Paid' },
-];
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'UAE Real Estate Platform API' });
@@ -157,6 +164,10 @@ app.delete('/api/properties/:id', (req, res) => {
 
 app.get('/api/clients', (req, res) => {
   res.json(clients);
+});
+
+app.get('/api/tenants', (req, res) => {
+  res.json(tenants);
 });
 
 app.get('/api/contracts', (req, res) => {

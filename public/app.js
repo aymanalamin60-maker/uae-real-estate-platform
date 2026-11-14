@@ -54,6 +54,10 @@ const translations = {
     edit: 'Edit',
     delete: 'Delete',
     noProperties: 'No properties found.',
+    tenantTable: 'Tenants',
+    unit: 'Unit',
+    dueDate: 'Due date',
+    openContracts: 'Open Contracts',
   },
   ar: {
     title: 'نظرة عامة على لوحة التحكم',
@@ -110,6 +114,10 @@ const translations = {
     edit: 'تعديل',
     delete: 'حذف',
     noProperties: 'لا توجد عقارات',
+    tenantTable: 'المستأجرون',
+    unit: 'الوحدة',
+    dueDate: 'تاريخ الاستحقاق',
+    openContracts: 'العقود المفتوحة',
   },
 };
 
@@ -121,6 +129,7 @@ const state = {
   dashboard: null,
   properties: [],
   clients: [],
+  tenants: [],
   contracts: [],
   commissions: [],
   editingPropertyId: null,
@@ -162,10 +171,11 @@ async function apiFetch(path, options = {}) {
 }
 
 async function loadDashboardData() {
-  const [dashboardData, propertyData, clientData, contractData, commissionData] = await Promise.all([
+  const [dashboardData, propertyData, clientData, tenantData, contractData, commissionData] = await Promise.all([
     apiFetch('/api/dashboard'),
     apiFetch('/api/properties'),
     apiFetch('/api/clients'),
+    apiFetch('/api/tenants'),
     apiFetch('/api/contracts'),
     apiFetch('/api/commissions'),
   ]);
@@ -173,6 +183,7 @@ async function loadDashboardData() {
   state.dashboard = dashboardData;
   state.properties = propertyData;
   state.clients = clientData;
+  state.tenants = tenantData;
   state.contracts = contractData;
   state.commissions = commissionData;
 }
@@ -340,7 +351,6 @@ function renderDashboard() {
 }
 
 function renderPropertySection() {
-  const editing = state.editingPropertyId !== null;
   const selected = state.properties.find((item) => item.id === state.editingPropertyId) || null;
 
   return `
@@ -434,6 +444,144 @@ function renderPropertySection() {
   `;
 }
 
+function renderTenantSection() {
+  return `
+    <div class="card">
+      <h3 style="margin-top:0;">${t('tenantTable')}</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>${t('tenantTable')}</th>
+              <th>${t('unit')}</th>
+              <th>${t('rent')}</th>
+              <th>${t('status')}</th>
+              <th>${t('dueDate')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(state.tenants || [])
+              .map(
+                (tenant) => `
+                  <tr>
+                    <td>${tenant.name}</td>
+                    <td>${tenant.unit}</td>
+                    <td>${tenant.rent}</td>
+                    <td><span class="badge ${tenant.status.toLowerCase().replace(/\s+/g, '')}">${tenant.status}</span></td>
+                    <td>${tenant.dueDate}</td>
+                  </tr>
+                `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderClientSection() {
+  return `
+    <div class="card">
+      <h3 style="margin-top:0;">${t('tableClients')}</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>${t('tableClients')}</th>
+              <th>${t('clientType')}</th>
+              <th>${t('city')}</th>
+              <th>${t('status')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(state.clients || [])
+              .map(
+                (client) => `
+                  <tr>
+                    <td>${client.name}</td>
+                    <td>${client.type}</td>
+                    <td>${client.city}</td>
+                    <td><span class="badge ${client.status.toLowerCase().replace(/\s+/g, '')}">${client.status}</span></td>
+                  </tr>
+                `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderContractSection() {
+  return `
+    <div class="card">
+      <h3 style="margin-top:0;">${t('openContracts')}</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>${t('tableContracts')}</th>
+              <th>${t('tenantTable')}</th>
+              <th>${t('rent')}</th>
+              <th>${t('status')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(state.contracts || [])
+              .map(
+                (contract) => `
+                  <tr>
+                    <td>${contract.property}</td>
+                    <td>${contract.tenant}</td>
+                    <td>${contract.rent}</td>
+                    <td><span class="badge ${contract.status.toLowerCase().replace(/\s+/g, '')}">${contract.status}</span></td>
+                  </tr>
+                `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderCommissionSection() {
+  return `
+    <div class="card">
+      <h3 style="margin-top:0;">${t('tableCommissions')}</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Deal</th>
+              <th>${t('amount')}</th>
+              <th>${t('status')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(state.commissions || [])
+              .map(
+                (item) => `
+                  <tr>
+                    <td>${item.agent}</td>
+                    <td>${item.deal}</td>
+                    <td>${item.amount}</td>
+                    <td><span class="badge ${item.status.toLowerCase().replace(/\s+/g, '')}">${item.status}</span></td>
+                  </tr>
+                `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
 async function handlePropertySubmit(event) {
   event.preventDefault();
   const formData = new FormData(event.target);
@@ -479,7 +627,15 @@ async function handlePropertyAction(target) {
 }
 
 function renderShell() {
-  const content = state.activeSection === 'dashboard' ? renderDashboard() : state.activeSection === 'properties' ? renderPropertySection() : `<div class="card"><h3>Coming soon</h3></div>`;
+  const sectionMap = {
+    dashboard: renderDashboard(),
+    properties: renderPropertySection(),
+    tenants: renderTenantSection(),
+    contracts: renderContractSection(),
+    clients: renderClientSection(),
+    commissions: renderCommissionSection(),
+    reports: '<div class="card"><h3>Reports</h3><p>Sales, occupancy, and activity reports are ready for future expansion.</p></div>',
+  };
 
   appRoot.innerHTML = `
     <div class="app-shell">
@@ -511,7 +667,7 @@ function renderShell() {
       <main class="content">
         <header class="topbar">
           <div class="page-title">
-            <h1>${state.activeSection === 'dashboard' ? t('title') : t('propertyFormTitle')}</h1>
+            <h1>${state.activeSection === 'dashboard' ? t('title') : t(`nav.${state.activeSection}`)}</h1>
             <p>${state.activeSection === 'dashboard' ? t('subtitle') : t('propertyFormSubtitle')}</p>
           </div>
           <div class="top-actions">
@@ -520,7 +676,7 @@ function renderShell() {
           </div>
         </header>
 
-        ${content}
+        ${sectionMap[state.activeSection] || ''}
       </main>
     </div>
   `;
