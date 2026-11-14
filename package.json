@@ -1,0 +1,16 @@
+{
+  "name": "uae-real-estate-platform",
+  "version": "1.0.0",
+  "description": "UAE real estate management platform demo with bilingual support",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.16"
+  }
+}
