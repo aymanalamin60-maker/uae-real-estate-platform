@@ -15,9 +15,20 @@ const demoUser = {
   company: 'UAE Property Group',
 };
 
-const dashboard = {
+const defaultProperties = [
+  { id: 1, title: 'Palm Heights Villa', type: 'Villa', location: 'Palm Jumeirah', bedrooms: 5, bathrooms: 4, price: 'AED 9.8M', status: 'Available', owner: 'Private Investor' },
+  { id: 2, title: 'Marina Bay Residence', type: 'Apartment', location: 'Dubai Marina', bedrooms: 2, bathrooms: 2, price: 'AED 2.4M', status: 'Rented', owner: 'UAE Property Group' },
+  { id: 3, title: 'Business Bay Office', type: 'Office', location: 'Business Bay', bedrooms: 0, bathrooms: 2, price: 'AED 4.9M', status: 'Available', owner: 'Commercial Buyer' },
+  { id: 4, title: 'City Walk Studio', type: 'Studio', location: 'Jumeirah', bedrooms: 1, bathrooms: 1, price: 'AED 1.1M', status: 'Booked', owner: 'Private Buyer' },
+  { id: 5, title: 'Sharjah Family House', type: 'Villa', location: 'Sharjah', bedrooms: 4, bathrooms: 3, price: 'AED 3.7M', status: 'Available', owner: 'Family Investor' },
+  { id: 6, title: 'Al Barsha Townhouse', type: 'Townhouse', location: 'Al Barsha', bedrooms: 3, bathrooms: 3, price: 'AED 2.9M', status: 'Under Renovation', owner: 'Private Owner' },
+];
+
+let properties = [...defaultProperties];
+
+const createDashboard = () => ({
   stats: [
-    { key: 'listed', label: 'Properties Listed', value: '248', trend: '+12.4%' },
+    { key: 'listed', label: 'Properties Listed', value: `${properties.length}`, trend: '+12.4%' },
     { key: 'occupied', label: 'Occupied Units', value: '176', trend: '+8.1%' },
     { key: 'revenue', label: 'Monthly Revenue', value: 'AED 4.8M', trend: '+15.9%' },
     { key: 'commissions', label: 'Pending Commissions', value: 'AED 680K', trend: '+6.3%' },
@@ -28,22 +39,16 @@ const dashboard = {
     { label: 'Negotiations', value: 18 },
     { label: 'Closed Deals', value: 11 },
   ],
-  recentProperties: [
-    { id: 1, name: 'Palm Heights Villa', type: 'Villa', location: 'Palm Jumeirah', status: 'Available', price: 'AED 9.8M', occupancy: 'Ready to move' },
-    { id: 2, name: 'Marina Bay Residence', type: 'Apartment', location: 'Dubai Marina', status: 'Rented', price: 'AED 2.4M', occupancy: 'Occupied' },
-    { id: 3, name: 'Business Bay Office', type: 'Office', location: 'Business Bay', status: 'Available', price: 'AED 4.9M', occupancy: 'Flexible' },
-    { id: 4, name: 'City Walk Studio', type: 'Studio', location: 'Jumeirah', status: 'Booked', price: 'AED 1.1M', occupancy: 'Awaiting handover' },
-  ],
-};
-
-const properties = [
-  { id: 1, title: 'Palm Heights Villa', type: 'Villa', location: 'Palm Jumeirah', bedrooms: 5, bathrooms: 4, price: 'AED 9.8M', status: 'Available', owner: 'Private Investor' },
-  { id: 2, title: 'Marina Bay Residence', type: 'Apartment', location: 'Dubai Marina', bedrooms: 2, bathrooms: 2, price: 'AED 2.4M', status: 'Rented', owner: 'UAE Property Group' },
-  { id: 3, title: 'Business Bay Office', type: 'Office', location: 'Business Bay', bedrooms: 0, bathrooms: 2, price: 'AED 4.9M', status: 'Available', owner: 'Commercial Buyer' },
-  { id: 4, title: 'City Walk Studio', type: 'Studio', location: 'Jumeirah', bedrooms: 1, bathrooms: 1, price: 'AED 1.1M', status: 'Booked', owner: 'Private Buyer' },
-  { id: 5, title: 'Sharjah Family House', type: 'Villa', location: 'Sharjah', bedrooms: 4, bathrooms: 3, price: 'AED 3.7M', status: 'Available', owner: 'Family Investor' },
-  { id: 6, title: 'Al Barsha Townhouse', type: 'Townhouse', location: 'Al Barsha', bedrooms: 3, bathrooms: 3, price: 'AED 2.9M', status: 'Under Renovation', owner: 'Private Owner' },
-];
+  recentProperties: properties.slice(0, 4).map((item) => ({
+    id: item.id,
+    name: item.title,
+    type: item.type,
+    location: item.location,
+    status: item.status,
+    price: item.price,
+    occupancy: item.status === 'Rented' ? 'Occupied' : 'Ready to move',
+  })),
+});
 
 const clients = [
   { id: 1, name: 'Ahmed Al-Mansoori', type: 'Buyer', phone: '+971 50 123 4567', email: 'ahmed@example.com', status: 'Qualified', city: 'Dubai' },
@@ -93,11 +98,61 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/dashboard', (req, res) => {
-  res.json(dashboard);
+  res.json(createDashboard());
 });
 
 app.get('/api/properties', (req, res) => {
   res.json(properties);
+});
+
+app.post('/api/properties', (req, res) => {
+  const { title, type, location, bedrooms, bathrooms, price, status, owner } = req.body || {};
+
+  if (!title || !type || !location || !price) {
+    return res.status(400).json({ message: 'Title, type, location, and price are required' });
+  }
+
+  const newProperty = {
+    id: Date.now(),
+    title,
+    type,
+    location,
+    bedrooms: Number(bedrooms || 0),
+    bathrooms: Number(bathrooms || 0),
+    price,
+    status: status || 'Available',
+    owner: owner || 'Private Owner',
+  };
+
+  properties = [newProperty, ...properties];
+  res.status(201).json(newProperty);
+});
+
+app.put('/api/properties/:id', (req, res) => {
+  const { id } = req.params;
+  const propertyIndex = properties.findIndex((item) => item.id === Number(id));
+
+  if (propertyIndex === -1) {
+    return res.status(404).json({ message: 'Property not found' });
+  }
+
+  const current = properties[propertyIndex];
+  const updated = { ...current, ...req.body, id: current.id };
+  properties[propertyIndex] = updated;
+
+  res.json(updated);
+});
+
+app.delete('/api/properties/:id', (req, res) => {
+  const { id } = req.params;
+  const originalLength = properties.length;
+  properties = properties.filter((item) => item.id !== Number(id));
+
+  if (properties.length === originalLength) {
+    return res.status(404).json({ message: 'Property not found' });
+  }
+
+  res.status(204).send();
 });
 
 app.get('/api/clients', (req, res) => {
